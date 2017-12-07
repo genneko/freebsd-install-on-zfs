@@ -1,0 +1,86 @@
+CUSTOM_CONFIG_BASEURL="http://172.16.10.120/install"
+OPTIONAL_SCRIPT_PRE=
+OPTIONAL_SCRIPT_BODY=body.scp
+OPTIONAL_SCRIPT_POST=
+DISTRIBUTIONS="base.txz kernel.txz"
+ZFSBOOT_DISKS="vtbd0"
+ZFSBOOT_VDEV_TYPE="stripe"
+ZFSBOOT_SWAP_SIZE=0
+ZFSBOOT_POOL_CREATE_OPTIONS="-O compression=lz4 -O atime=off -O com.sun:auto-snapshot=true"
+ZFSBOOT_POOL_NAME="zroot"
+ZFSBOOT_BEROOT_NAME="ROOT"
+ZFSBOOT_BOOTFS_NAME="default"
+ZFSBOOT_GELI_ENCRYPTION=
+ZFSBOOT_DATASETS="
+	# DATASET	OPTIONS (comma or space separated; or both)
+
+	# Boot Environment [BE] root and default boot dataset
+	/$ZFSBOOT_BEROOT_NAME				mountpoint=none
+	/$ZFSBOOT_BEROOT_NAME/$ZFSBOOT_BOOTFS_NAME	mountpoint=/
+
+	# Compress /tmp, allow exec but not setuid
+	# Omit from auto snapshot
+	/tmp		mountpoint=/tmp,exec=on,setuid=off,com.sun:auto-snapshot=false
+
+	# Don't mount /usr so that 'base' files go to the BEROOT
+	/usr		mountpoint=/usr,canmount=off
+
+	# Don't mount /usr/local too for the same reason.
+	/usr/local	canmount=off
+
+	# Home directories separated so they are common to all BEs
+	/home		mountpoint=/home
+
+	# Ports tree
+	/usr/ports	setuid=off,com.sun:auto-snapshot=false
+
+	# Source tree (compressed)
+	/usr/src	com.sun:auto-snapshot=false
+	/usr/obj	com.sun:auto-snapshot=false
+
+	# Create /var and friends
+	/var		mountpoint=/var,canmount=off
+	/var/audit	exec=off,setuid=off
+	/var/crash	exec=off,setuid=off,com.sun:auto-snapshot=false
+	/var/log	exec=off,setuid=off
+	/var/mail	atime=on
+	/var/tmp	setuid=off,com.sun:auto-snapshot=false
+
+	# Data
+	/data		mountpoint=/data
+	/data/backup	recordsize=1M,compression=off
+	/data/export
+	/data/export/Documents
+	/data/export/album	recordsize=1M,compression=off
+	/data/export/log
+	/data/export/music	recordsize=1M,compression=off
+	/data/export/public
+	/data/export/video	recordsize=1M,compression=off
+	/data/var
+	/data/var/album	compression=off
+	/data/work	compression=off
+
+	# Apps
+	/usr/local/pgsql	recordsize=16K,primarycache=metadata
+	/usr/local/pgsql/data
+" # END-QUOTE
+
+HOSTNAME="freebsd.example.com"
+KEYMAP="jp"
+NIC_LIST="vtnet0"
+IP_LIST="172.16.10.100"
+NETMASK_LIST="255.255.255.0"
+DEFAULTROUTER="172.16.10.1"
+SEARCHDOMAINS="example.com"
+NAMESERVER_LIST="172.16.10.5 172.16.20.5"
+DEFAULT_ROOT_PASSWORD="root"
+DEFAULT_USER_GROUP_NAME="users"
+DEFAULT_USER_GROUP_ID="100"
+DEFAULT_USER_NAME="freebsd"
+DEFAULT_USER_ID="500"
+DEFAULT_USER_PASSWORD="freebsd"
+SSH_PERMIT_ROOT_LOGIN_IPRANGE="127.0.0.0/8"
+TIME_ZONE=Asia/Tokyo
+PROXY_SERVER=
+PKG_LIST="beadm sudo zfstools tmux bash rsync lv ja-nkf zip unzip wget curl gnupg1 git"
+ZVOL_SWAP_SIZE="2G"
