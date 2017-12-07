@@ -2,7 +2,7 @@
 FreeBSD ZFS custom installation script for use with bsdinstall.
 
 ## Quick Start
-Basically, you need two hosts which can commnicate each other. One is a host to which you install FreeBSD ("Target" here) and the other is a host which provides the first one with this install script ("Provider" here). The latter may be your laptop or something like that.
+Basically, you need two hosts which can commnicate each other. One is a host to which you install FreeBSD ("Target" here) and the other is a host which provides the first one with this install script ("Provider" here). The latter may be your laptop or anything like that.
 
 ### Provider (hosting scripts to Target)
 1. Clone this repository on the Provider.
@@ -11,13 +11,14 @@ provider$ cd ~/tmp
 provider$ git clone https://github.com/genneko/freebsd-install-on-zfs.git
 ```
 
-2. Copy/rename sample \*.cfg/scp and edit them appropriately.
+2. Copy/rename sample \*.cfg/scp and edit them as needed.
 ```
 provider$ cp baremetal.cfg.sample myserver.cfg
 provider$ cp body.scp.sample body.scp
 provider$ cp post.scp.sample post.scp
 provider$ vi myserver.cfg
 provider$ vi body.scp
+provider$ vi post.scp
 ```
 
 3. Start a web server to host this repository contents, more specifically install.sh and \*.cfg/scp files. Off course, you can also put those files into your existing web server's document directory instead of newly starting a service.
@@ -47,7 +48,7 @@ nameserver 172.16.20.5
 EOS
 ```
 
-4. Download install.sh and .cfg file from the Provider.
+4. Download install.sh and .cfg file from the Provider. Note that you don't have to download \*.scp files because they are automatically downloaded in the second phase of the installtion process.
 ```
 $ cd /tmp
 $ fetch http://target.example.com:8000/install.sh
@@ -75,7 +76,7 @@ $ less bsdinstall_log
 $ shutdown -r now
 ```
 
-9. After the first boot, login and perform necessary configurations as usual.
+9. After the first boot, login and perform necessary configurations as usual. You can also do those tasks by post.scp.
 ```
 # passwd root
 # passwd freebsd
