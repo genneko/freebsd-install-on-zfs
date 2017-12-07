@@ -1,5 +1,0 @@
-#
-# Make directory symlinks for compatibility.
-#
-ln -s /data/backup /backup
-ln -s /data/export /export

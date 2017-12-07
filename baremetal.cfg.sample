@@ -1,10 +1,12 @@
-CUSTOM_CONFIG_BASEURL="http://172.16.10.120/install"
+CUSTOM_CONFIG_BASEURL="http://192.168.1.120:8000"
 OPTIONAL_SCRIPT_PRE=
 OPTIONAL_SCRIPT_BODY=body.scp
-OPTIONAL_SCRIPT_POST=
+OPTIONAL_SCRIPT_POST=post.scp
 DISTRIBUTIONS="base.txz kernel.txz"
-ZFSBOOT_DISKS="vtbd0"
+ZFSBOOT_DISKS="ada0"
+#ZFSBOOT_DISKS="ada0 ada1"
 ZFSBOOT_VDEV_TYPE="stripe"
+#ZFSBOOT_VDEV_TYPE="mirror"
 ZFSBOOT_SWAP_SIZE=0
 ZFSBOOT_POOL_CREATE_OPTIONS="-O compression=lz4 -O atime=off -O com.sun:auto-snapshot=true"
 ZFSBOOT_POOL_NAME="zroot"
@@ -48,7 +50,7 @@ ZFSBOOT_DATASETS="
 
 	# Data
 	/data		mountpoint=/data
-	/data/backup	recordsize=1M,compression=off
+	/data/backup	recordsize=1M,compression=off,com.sun:auto-snapshot=false
 	/data/export
 	/data/export/Documents
 	/data/export/album	recordsize=1M,compression=off
@@ -67,20 +69,20 @@ ZFSBOOT_DATASETS="
 
 HOSTNAME="freebsd.example.com"
 KEYMAP="jp"
-NIC_LIST="vtnet0"
-IP_LIST="172.16.10.100"
+NIC_LIST="em0"
+IP_LIST="192.168.1.5"
 NETMASK_LIST="255.255.255.0"
-DEFAULTROUTER="172.16.10.1"
+DEFAULTROUTER="192.168.1.1"
 SEARCHDOMAINS="example.com"
-NAMESERVER_LIST="172.16.10.5 172.16.20.5"
+NAMESERVER_LIST="192.168.1.1"
 DEFAULT_ROOT_PASSWORD="root"
 DEFAULT_USER_GROUP_NAME="users"
 DEFAULT_USER_GROUP_ID="100"
 DEFAULT_USER_NAME="freebsd"
 DEFAULT_USER_ID="500"
 DEFAULT_USER_PASSWORD="freebsd"
-SSH_PERMIT_ROOT_LOGIN_IPRANGE="127.0.0.0/8"
+SSH_PERMIT_ROOT_LOGIN_IPRANGE="192.168.1.0/24,127.0.0.0/8"
 TIME_ZONE=Asia/Tokyo
 PROXY_SERVER=
-PKG_LIST="beadm sudo zfstools tmux bash rsync lv ja-nkf zip unzip wget curl gnupg1 git"
-ZVOL_SWAP_SIZE="2G"
+PKG_LIST="beadm sudo zfstools tmux bash rsync lv ja-nkf zip unzip wget curl gnupg1 git portmaster"
+ZVOL_SWAP_SIZE="4G"

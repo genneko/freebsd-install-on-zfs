@@ -13,8 +13,9 @@ provider$ git clone https://github.com/genneko/freebsd-install-on-zfs.git
 
 2. Copy/rename sample \*.cfg/scp and edit them appropriately.
 ```
-provider$ cp baremetal-mirror.cfg.sample myserver.cfg
-provider$ cp baremetal-body.scp body.scp
+provider$ cp baremetal.cfg.sample myserver.cfg
+provider$ cp body.scp.sample body.scp
+provider$ cp post.scp.sample post.scp
 provider$ vi myserver.cfg
 provider$ vi body.scp
 ```
@@ -46,12 +47,11 @@ nameserver 172.16.20.5
 EOS
 ```
 
-4. Download install.sh and sample config/script files from the Provider.
+4. Download install.sh and .cfg file from the Provider.
 ```
 $ cd /tmp
 $ fetch http://target.example.com:8000/install.sh
 $ fetch http://target.example.com:8000/myserver.cfg
-$ fetch http://target.example.com:8000/body.scp
 ```
 
 5. Set the CUSTOM_CONFIG_FILE to \*.cfg filename and export it.

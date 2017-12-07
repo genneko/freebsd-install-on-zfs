@@ -1,0 +1,4 @@
+#
+# Change user shell to bash.
+#
+pw usermod -n $DEFAULT_USER_NAME -s /usr/local/bin/bash
