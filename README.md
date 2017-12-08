@@ -13,6 +13,7 @@ provider$ git clone https://github.com/genneko/freebsd-install-on-zfs.git
 
 2. Copy/rename sample \*.cfg/scp files and edit them as needed.
 ```
+provider$ cd freebsd-install-on-zfs
 provider$ cp baremetal.cfg.sample myserver.cfg
 provider$ cp body.scp.sample body.scp
 provider$ cp post.scp.sample post.scp
@@ -23,7 +24,7 @@ provider$ vi post.scp
 
 3. Start a web server to host this repository contents, more specifically install.sh and \*.cfg/scp files. Off course, you can also put those files into your existing web server's document directory instead of newly starting a service.
 
-One way to do this is using python's built-in module as follows.
+One way to do this is using the python's built-in web server module as follows.
 ```
 provider$ python -m SimpleHTTPServer
 Serving HTTP on 0.0.0.0 port 8000 ...
