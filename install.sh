@@ -109,10 +109,19 @@ load_script(){
 	local filename="$1"
 	if [ -n "$filename" ]; then
 		cd /tmp
-		fetch ${CUSTOM_CONFIG_BASEURL}/${filename}
+		fetch --no-proxy=* ${CUSTOM_CONFIG_BASEURL}/${filename}
 		. ./${filename}
 	fi
 }
+
+#
+# Create temporary /etc/resolv.conf for name resolution.
+#
+if [ -n "$NAMESERVER" ]; then
+	cat <<EOS> /etc/resolv.conf
+nameserver $NAMESERVER
+EOS
+fi
 
 #
 # Load default configuration file.
@@ -170,7 +179,11 @@ sysrc -f /boot/loader.conf beastie_disable="NO"
 sysrc -f /boot/loader.conf autoboot_delay="3"
 
 if [ -n "$hv" ]; then
-	sysrc -f /boot/loader.conf console="vidconsole,comconsole"
+	if [ "xen" = "$hv" ]; then
+		sysrc -f /boot/loader.conf console="vidconsole,comconsole"
+	else
+		sysrc -f /boot/loader.conf console="vidconsole"
+	fi
 fi
 
 #
@@ -205,8 +218,7 @@ done
 #
 # /etc/resolv.conf
 #
-touch /etc/resolv.conf
-cat <<EOF>> /etc/resolv.conf
+cat <<EOF> /etc/resolv.conf
 search ${SEARCHDOMAINS}
 EOF
 
