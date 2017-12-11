@@ -195,6 +195,8 @@ sysrc keymap="${KEYMAP}"
 sysrc defaultrouter="${DEFAULTROUTER}"
 sysrc sshd_enable="YES"
 sysrc dumpdev="NO"
+sysrc ntpd_enable="YES"
+sysrc ntpd_sync_on_start="YES"
 
 if [ "xen" = "$hv" ]; then
 	sysrc xenguest_enable="YES"
