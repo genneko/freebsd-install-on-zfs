@@ -17,11 +17,11 @@ Basically, you need two hosts which can commnicate each other. One is a host to 
     ```
     provider$ cd freebsd-install-on-zfs
     provider$ cp baremetal.cfg.sample myserver.cfg
-    provider$ cp body.scp.sample body.scp
-    provider$ cp post.scp.sample post.scp
+    provider$ cp base.scp.sample base.scp
+    provider$ cp pkg.scp.sample pkg.scp
     provider$ vi myserver.cfg
-    provider$ vi body.scp
-    provider$ vi post.scp
+    provider$ vi base.scp
+    provider$ vi pkg.scp
     ```
 
 3. Start a web server to host this repository contents, more specifically install.sh and \*.cfg/scp files. Off course, you can also put those files into your existing web server's document directory instead of newly starting a service.
@@ -86,7 +86,7 @@ Basically, you need two hosts which can commnicate each other. One is a host to 
     # shutdown -r now
     ```
 
-9. After the first boot, login as a DEFAULT_USER_NAME and perform necessary configurations as usual. You can also automate some of those tasks by customizing post.scp.
+9. After the first boot, login as a DEFAULT_USER_NAME and perform necessary configurations as usual. You can also automate some of those tasks by customizing base.scp (OPTIONAL_SCRIPT_BASE).
     ```
     $ sudo passwd root
     $ passwd freebsd
@@ -132,7 +132,7 @@ __Bold__ is mandatory while the others are optional.
 
 - __CUSTOM_CONFIG_BASEURL__
 
-    Web-accessible location of configuration file (.cfg) and optional post-installation scripts (.scp). They are automatically downloaded in the phase 2 (post-installation setup).
+    Web-accessible location of configuration file (.cfg) and optional post-installation scripts (.scp). They are automatically downloaded in the phase 2.
 
 - __HOSTNAME__
 
@@ -168,11 +168,11 @@ __Bold__ is mandatory while the others are optional.
 
 - DEFAULT_USER_GROUP_NAME
 
-    Group name for $DEFAULT_USER_NAME. Default is "users".
+    Group name for DEFAULT_USER_NAME. Default is "users".
 
 - DEFAULT_USER_GROUP_ID
 
-    Group ID for $DEFAULT_USER_GROUP_NAME. Default is 100.
+    Group ID for DEFAULT_USER_GROUP_NAME. Default is 100.
 
 - DEFAULT_USER_NAME
 
@@ -180,11 +180,11 @@ __Bold__ is mandatory while the others are optional.
 
 - DEFAULT_USER_ID
 
-    Default user ID for $DEFAULT_USER_NAME. Default is 500.
+    Default user ID for DEFAULT_USER_NAME. Default is 500.
     
 - DEFAULT_USER_PASSWORD
 
-    Default password for $DEFAULT_USER_NAME. Default is "freebsd". Change this immediately after the first login.
+    Default password for DEFAULT_USER_NAME. Default is "freebsd". Change this immediately after the first login.
 
 - PKG_LIST
 
@@ -216,17 +216,17 @@ __Bold__ is mandatory while the others are optional.
 
 - SSH_AUTHORIZED_KEYS_FILE
 
-    A file which contains one or more SSH public key(s) with which you can SSH-login to the target system. This file should be in the same place on the web server as install.sh ($CUSTOM_CONFIG_BASEURL). The file will be installed as $DEFAULT_USER_NAME's ~/.ssh/authorized_keys. If $SSH_PERMIT_ROOT_LOGIN_IPRANGE is set, it will be installed as /root/.ssh/authorized_keys too. Default is none.
+    A file which contains one or more SSH public key(s) with which you can SSH-login to the target system. This file should be in the same place on the web server as install.sh (CUSTOM_CONFIG_BASEURL). The file will be installed as DEFAULT_USER_NAME's ~/.ssh/authorized_keys. If SSH_PERMIT_ROOT_LOGIN_IPRANGE is set, it will be installed as /root/.ssh/authorized_keys too. Default is none.
     
-- OPTIONAL_SCRIPT_PRE
+- OPTIONAL_SCRIPT_INIT
 
-    Optional script which is executed at the very beginning of the phase 2. This file should be in the same place on the web server as install.sh ($CUSTOM_CONFIG_BASEURL). Default is none.
+    Optional script which is executed at the very beginning of the phase 2, just after the base system is installed. This file should be in the same place on the web server as install.sh (CUSTOM_CONFIG_BASEURL). Default is none.
 
-- OPTIONAL_SCRIPT_BODY
+- OPTIONAL_SCRIPT_BASE
 
-    Optional script which is executed at the middle of the phase 2. This file should be in the same place on the web server as install.sh ($CUSTOM_CONFIG_BASEURL). Default is none.
+    Optional script which is executed at the middle of the phase 2, just after the base system configurations are finished. This file should be in the same place on the web server as install.sh (CUSTOM_CONFIG_BASEURL). Default is none.
 
-- OPTIONAL_SCRIPT_POST
+- OPTIONAL_SCRIPT_PKG
 
-    Optional script which is executed at the end of the phase 2 (thus the end of the installation). This file should be in the same place on the web server as install.sh ($CUSTOM_CONFIG_BASEURL). Default is none.
+    Optional script which is executed at the end of the phase 2, just after the basic packages specified by PKG_LIST are installed (thus the end of the installation). This file should be in the same place on the web server as install.sh (CUSTOM_CONFIG_BASEURL). Default is none.
 
