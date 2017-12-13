@@ -2,7 +2,7 @@
 FreeBSD ZFS custom installation script for use with bsdinstall.
 
 ## Quick Start
-Basically, you need two hosts which can commnicate each other. One is a host to which you install FreeBSD ("Target" here) and the other is a host which provides the first one with this install script ("Provider" here). The latter may be your laptop or anything like that.
+Basically, you need two hosts which can communicate with each other. One is a host to which you install FreeBSD ("Target" here) and the other is a host which provides the first one with this install script ("Provider" here). The latter may be your laptop or anything like that.
 
 ### Provider (hosting scripts to Target)
 1. Clone this repository on the Provider.
