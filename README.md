@@ -91,10 +91,6 @@ Basically, you need two hosts which can commnicate each other. One is a host to 
     $ sudo passwd root
     $ passwd freebsd
     
-    $ sudo sysrc ntpd_enable=YES
-    $ sudo sysrc ntpd_sync_on_start=YES
-    $ sudo service ntpd start
-    
     $ sudo zfs snapshot -r zroot/ROOT/default@install-03user
     $ sudo beadm create 11.1
     
@@ -107,22 +103,6 @@ Basically, you need two hosts which can commnicate each other. One is a host to 
 ## Configuration parameters
 ### Variables used during system installation process (phase 1)
 __Bold__ is mandatory while the others are optional.
-
-- __CUSTOM_CONFIG_BASEURL__
-
-    Web-accessible location of configuration file (.cfg) and optional post-installation scripts (.scp). They are automatically downloaded in the phase 2 (post-installation setup).
-
-- OPTIONAL_SCRIPT_PRE
-
-    Optional script which is executed at the very beginning of the phase 2. Default is none (empty string).
-
-- OPTIONAL_SCRIPT_BODY
-
-    Optional script which is executed at the middle of the phase 2. Default is none (empty string).
-
-- OPTIONAL_SCRIPT_POST
-
-    Optional script which is executed at the end of the phase 2 (thus the end of the installation). Default is none (empty string).
 
 - DISTRIBUTIONS
 
@@ -150,9 +130,29 @@ __Bold__ is mandatory while the others are optional.
 
 ### Variables used during post-installation setup process (phase 2)
 
+- __CUSTOM_CONFIG_BASEURL__
+
+    Web-accessible location of configuration file (.cfg) and optional post-installation scripts (.scp). They are automatically downloaded in the phase 2 (post-installation setup).
+
+- OPTIONAL_SCRIPT_PRE
+
+    Optional script which is executed at the very beginning of the phase 2. Default is none (empty string).
+
+- OPTIONAL_SCRIPT_BODY
+
+    Optional script which is executed at the middle of the phase 2. Default is none (empty string).
+
+- OPTIONAL_SCRIPT_POST
+
+    Optional script which is executed at the end of the phase 2 (thus the end of the installation). Default is none (empty string).
+
 - __HOSTNAME__
 
     Target system's hostname. It can be FQDN.
+
+- KEYMAP
+
+    A keymap to use (i.e. jp).
 
 - __NIC_LIST__
 
@@ -177,6 +177,10 @@ __Bold__ is mandatory while the others are optional.
 - __NAMESERVER_LIST__
 
     Space-delimited list of name servers to use.
+
+- TIME_ZONE
+
+    A timezone to use (i.e. Asia/Tokyo).
 
 - PROXY_SERVER
 
