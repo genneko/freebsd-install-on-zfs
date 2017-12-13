@@ -122,7 +122,7 @@ __Bold__ is mandatory while the others are optional.
 
 - ZFSBOOT_GELI_ENCRYPTION
 
-    Set this to non-empty value (e.g. 1) when you want to use whole disk encryption with GELI. Default is none (empty string).
+    Set this to non-empty value (e.g. 1) when you want to use whole disk encryption with GELI. Default is none.
 
 - __ZFSBOOT_DATASETS__
 
@@ -134,29 +134,13 @@ __Bold__ is mandatory while the others are optional.
 
     Web-accessible location of configuration file (.cfg) and optional post-installation scripts (.scp). They are automatically downloaded in the phase 2 (post-installation setup).
 
-- OPTIONAL_SCRIPT_PRE
-
-    Optional script which is executed at the very beginning of the phase 2. Default is none (empty string).
-
-- OPTIONAL_SCRIPT_BODY
-
-    Optional script which is executed at the middle of the phase 2. Default is none (empty string).
-
-- OPTIONAL_SCRIPT_POST
-
-    Optional script which is executed at the end of the phase 2 (thus the end of the installation). Default is none (empty string).
-
 - __HOSTNAME__
 
-    Target system's hostname. It can be FQDN.
-
-- KEYMAP
-
-    A keymap to use (e.g. jp).
+    Target system's hostname. It can be a FQDN.
 
 - __NIC_LIST__
 
-    Space-delimited list of network interface names.
+    Space-delimited list of network interface names (e.g. "em0 em1").
 
 - __IP_LIST__
 
@@ -178,13 +162,29 @@ __Bold__ is mandatory while the others are optional.
 
     Space-delimited list of name servers to use.
 
-- TIME_ZONE
+- DEFAULT_ROOT_PASSWORD
 
-    A timezone to use (e.g. Asia/Tokyo).
+    Default password for root. Default is "root". Change this immediately after the first login.
 
-- PROXY_SERVER
+- DEFAULT_USER_GROUP_NAME
 
-    Set this to something like ``http://proxyhost:port/`` if the target system has to use a HTTP proxy to reach outside world. Default is none (empty string).
+    Group name for $DEFAULT_USER_NAME. Default is "users".
+
+- DEFAULT_USER_GROUP_ID
+
+    Group ID for $DEFAULT_USER_GROUP_NAME. Default is 100.
+
+- DEFAULT_USER_NAME
+
+    Default user name. Default is "freebsd".
+
+- DEFAULT_USER_ID
+
+    Default user ID for $DEFAULT_USER_NAME. Default is 500.
+    
+- DEFAULT_USER_PASSWORD
+
+    Default password for $DEFAULT_USER_NAME. Default is "freebsd". Change this immediately after the first login.
 
 - PKG_LIST
 
@@ -193,3 +193,40 @@ __Bold__ is mandatory while the others are optional.
 - ZVOL_SWAP_SIZE
 
     Size of a ZVOL used for swap space. Default is 2G.
+
+- KEYMAP
+
+    A keymap to use (e.g. "jp"). Default is none (use system default).
+
+- TIME_ZONE
+
+    A timezone to use (e.g. "Asia/Tokyo"). Default is none (use system default).
+
+- PROXY_SERVER
+
+    Set this to something like ``http://proxyhost:port/`` if the target system has to use a HTTP proxy to reach outside world. Default is none.
+
+- NO_PROXY
+
+    Set this to a comma-separated list of domains which you want bypass proxy server. Only valid when PROXY_SERVER is also set. Default is none.
+
+- SSH_PERMIT_ROOT_LOGIN_IPRANGE
+
+    Set this to a comma-separated list of hostnames/addresses/CIDRs from which you want to SSH-login as root. Default is none.
+
+- SSH_AUTHORIZED_KEYS_FILE
+
+    A file which contains one or more SSH public key(s) with which you can SSH-login to the target system. This file should be in the same place on the web server as install.sh ($CUSTOM_CONFIG_BASEURL). The file will be installed as $DEFAULT_USER_NAME's ~/.ssh/authorized_keys. If $SSH_PERMIT_ROOT_LOGIN_IPRANGE is set, it will be installed as /root/.ssh/authorized_keys too. Default is none.
+    
+- OPTIONAL_SCRIPT_PRE
+
+    Optional script which is executed at the very beginning of the phase 2. This file should be in the same place on the web server as install.sh ($CUSTOM_CONFIG_BASEURL). Default is none.
+
+- OPTIONAL_SCRIPT_BODY
+
+    Optional script which is executed at the middle of the phase 2. This file should be in the same place on the web server as install.sh ($CUSTOM_CONFIG_BASEURL). Default is none.
+
+- OPTIONAL_SCRIPT_POST
+
+    Optional script which is executed at the end of the phase 2 (thus the end of the installation). This file should be in the same place on the web server as install.sh ($CUSTOM_CONFIG_BASEURL). Default is none.
+
