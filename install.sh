@@ -5,6 +5,14 @@
 # Usage
 #   First, copy/create/edit *.cfg.sample to whatyoulike.cfg
 #   on a host such as your laptop.
+#   Optionally, do the same for *.scp files.
+#
+#     cp baremetal.cfg.sample whatyoulike.cfg
+#     cp base.scp.sample base.scp
+#     cp pkg.scp.sample pkg.scp
+#     vi whatyoulike.cfg
+#     vi base.scp
+#     vi pkg.scp
 #
 #   Then spin up web server on the host.
 #   One way to do this is running the following command in
@@ -17,6 +25,7 @@
 #   (Assume that 192.168.10.120 is your laptop.)
 #
 #     dhclient em0
+#     export NAMESERVER=192.168.10.1
 #     cd /tmp
 #     fetch http://192.168.10.120:8000/install.sh
 #     fetch http://192.168.10.120:8000/whatyoulike.cfg
@@ -24,6 +33,10 @@
 #     bsdinstall script install.sh
 #     less bsdinstall_log
 #     reboot
+#
+#   Full descriptions are found on the following URL.
+#     https://github.com/genneko/freebsd-install-on-zfs
+#
 
 ####################################################
 # PREAMBLE
@@ -115,12 +128,68 @@ load_script(){
 }
 
 #
+# void load_file <filename> <destpath>
+#
+load_file(){
+	local filename="$1"
+	local destpath="$2"
+	if [ -n "$filename" -a -n "$destpath" ]; then
+		fetch --no-proxy=* -o "$destpath" ${CUSTOM_CONFIG_BASEURL}/${filename}
+	fi
+}
+
+_write_file(){
+	local flag="$1"
+	local destpath="$2"
+	local content="$3"
+	if [ -n "$destpath" ]; then
+		IFS_SAVE=$IFS
+		IFS=
+		if echo "$flag" | fgrep -q "insertnewline"; then
+			echo >> "$destpath"
+		fi
+		if echo "$flag" | fgrep -q "overwrite"; then
+			if [ -e "$destpath" ]; then
+				bkpath="$destpath.$(date '+%s')"
+				mv "$destpath" "$bkpath"
+			fi
+			echo $content > "$destpath"
+		else
+			echo $content >> "$destpath"
+		fi
+		IFS=$IFS_SAVE
+	fi
+}
+
+#
+# void write_file <destpath> <content>
+#
+write_file(){
+	_write_file "" "$1" "$2"
+}
+# insert newline first
+write_file_nl(){
+	_write_file "insertnewline" "$1" "$2"
+}
+# overwrite
+write_file_new(){
+	_write_file "overwrite" "$1" "$2"
+}
+
+#
+# Shorthands (PART1)
+#
+cf_rc=/etc/rc.conf
+cf_sysctl=/etc/sysctl.conf
+cf_loader=/boot/loader.conf
+cf_resolv=/etc/resolv.conf
+cf_sshd=/etc/ssh/sshd_config
+
+#
 # Create temporary /etc/resolv.conf for name resolution.
 #
 if [ -n "$NAMESERVER" ]; then
-	cat <<EOS> /etc/resolv.conf
-nameserver $NAMESERVER
-EOS
+	write_file_nl $cf_resolv "nameserver $NAMESERVER"
 fi
 
 #
@@ -129,7 +198,6 @@ fi
 load_script "${CUSTOM_CONFIG_FILE}"
 
 : ${HOSTNAME:=freebsd}
-: ${KEYMAP:=jp}
 : ${NIC_LIST=em0}
 : ${IP_LIST=192.168.10.5}
 : ${NETMASK_LIST=255.255.255.0}
@@ -142,24 +210,85 @@ load_script "${CUSTOM_CONFIG_FILE}"
 : ${DEFAULT_USER_NAME:=freebsd}
 : ${DEFAULT_USER_ID:=500}
 : ${DEFAULT_USER_PASSWORD:=freebsd}
-: ${SSH_PERMIT_ROOT_LOGIN_IPRANGE=192.168.10.0/24,127.0.0.0/8}
-: ${TIME_ZONE:=Asia/Tokyo}
-: ${PROXY_SERVER=}
 : ${PKG_LIST=beadm sudo zfstools}
 : ${ZVOL_SWAP_SIZE:=2G}
 
+: ${KEYMAP=}
+: ${TIME_ZONE=}
+: ${PROXY_SERVER=}
+: ${NO_PROXY=}
+: ${SSH_PERMIT_ROOT_LOGIN_IPRANGE=}
+: ${SSH_AUTHORIZED_KEYS_FILE=}
+: ${OPTIONAL_SCRIPT_INIT=}
+: ${OPTIONAL_SCRIPT_BASE=}
+: ${OPTIONAL_SCRIPT_PKG=}
+
+export HOSTNAME
+export NIC_LIST
+export IP_LIST
+export NETMASK_LIST
+export DEFAULTROUTER
+export SEARCHDOMAINS
+export NAMESERVER_LIST
+export DEFAULT_ROOT_PASSWORD
+export DEFAULT_USER_GROUP_NAME
+export DEFAULT_USER_GROUP_ID
+export DEFAULT_USER_NAME
+export DEFAULT_USER_ID
+export DEFAULT_USER_PASSWORD
+export PKG_LIST
+export ZVOL_SWAP_SIZE
+
+export KEYMAP
+export TIME_ZONE
+export PROXY_SERVER
+export NO_PROXY
+export SSH_PERMIT_ROOT_LOGIN_IPRANGE
+export SSH_AUTHORIZED_KEYS_FILE
+export OPTIONAL_SCRIPT_INIT
+export OPTIONAL_SCRIPT_BASE
+export OPTIONAL_SCRIPT_PKG
+
 #
-# Run optional pre script.
+# Shorthands (PART2)
 #
-load_script "$OPTIONAL_SCRIPT_PRE"
+username=$DEFAULT_USER_NAME
+groupname=$DEFAULT_USER_GROUP_NAME
+dir_user_home=/home/$username
+dir_user_ssh=$dir_user_home/.ssh
+dir_root_home=/root
+dir_root_ssh=$dir_root_home/.ssh
+
+cf_user_cshrc=$dir_user_home/.cshrc
+cf_root_cshrc=$dir_root_home/.cshrc
+cf_user_ssh_ak=$dir_user_ssh/authorized_keys
+cf_root_ssh_ak=$dir_root_ssh/authorized_keys
+
+tmp_cshrc=/cshrc.addon
 
 
+#
+# SNAPSHOT 00: (A) BASE SYSTEM INSTALLED.
+#
+zfs snapshot -r ${ZFSBOOT_POOL_NAME}/${ZFSBOOT_BEROOT_NAME}/${ZFSBOOT_BOOTFS_NAME}@install-00A-basesys-installed
 
-##########
-# First snapshot. No configuration customized yet.
-##########
-zfs snapshot -r ${ZFSBOOT_POOL_NAME}/${ZFSBOOT_BEROOT_NAME}/${ZFSBOOT_BOOTFS_NAME}@install-00dist
 
+#
+# SCRIPT 00: ADDITIONAL INITIALIZATIONS via "init" script.
+#
+if [ -n "$OPTIONAL_SCRIPT_INIT" ]; then
+	load_script "$OPTIONAL_SCRIPT_INIT"
+
+	#
+	# SNAPSHOT 00: (B) INIT SCRIPT EXECUTED.
+	#
+	zfs snapshot -r ${ZFSBOOT_POOL_NAME}/${ZFSBOOT_BEROOT_NAME}/${ZFSBOOT_BOOTFS_NAME}@install-00B-script-init-done
+fi
+
+
+##############################################################
+# PART 01 of 02: BASIC SYSTEM CONFIGURATIONS
+##############################################################
 #
 # Is this on a virtual environment (hypervisor)?
 #
@@ -169,20 +298,20 @@ hv=$(sysctl -n kern.vm_guest)
 # /etc/sysctl.conf
 #
 if [ -n "$hv" ]; then
-	sysrc -f /etc/sysctl.conf net.inet.tcp.tso=0
+	sysrc -f $cf_sysctl net.inet.tcp.tso=0
 fi
 
 #
 # /boot/loader.conf
 #
-sysrc -f /boot/loader.conf beastie_disable="NO"
-sysrc -f /boot/loader.conf autoboot_delay="3"
+sysrc -f $cf_loader beastie_disable="NO"
+sysrc -f $cf_loader autoboot_delay="3"
 
 if [ -n "$hv" ]; then
 	if [ "xen" = "$hv" ]; then
-		sysrc -f /boot/loader.conf console="vidconsole,comconsole"
+		sysrc -f $cf_loader console="vidconsole,comconsole"
 	else
-		sysrc -f /boot/loader.conf console="vidconsole"
+		sysrc -f $cf_loader console="vidconsole"
 	fi
 fi
 
@@ -191,17 +320,14 @@ fi
 #
 sysrc zfs_enable="YES"
 sysrc hostname="${HOSTNAME}"
-sysrc keymap="${KEYMAP}"
+if [ -n "$KEYMAP" ]; then
+	sysrc keymap="${KEYMAP}"
+fi
 sysrc defaultrouter="${DEFAULTROUTER}"
 sysrc sshd_enable="YES"
 sysrc dumpdev="NO"
 sysrc ntpd_enable="YES"
 sysrc ntpd_sync_on_start="YES"
-
-if [ "xen" = "$hv" ]; then
-	sysrc xenguest_enable="YES"
-	sysrc xe_daemon_enable="YES"
-fi
 
 if [ -n "$hv" ]; then
 	ifopt=" -tso"
@@ -214,39 +340,29 @@ for nic in $NIC_LIST; do
 	ip=`echo $IP_LIST | cut -d " " -f $i`
 	mask=`echo $NETMASK_LIST | cut -d " " -f $i`
 	sysrc ifconfig_${nic}="inet $ip netmask ${mask:-255.255.255.0}${ifopt}"
+	if [ $i -eq 1 ]; then
+		export NIC1=$nic
+	elif [ $i -eq 2]; then
+		export NIC2=$nic
+	fi
 	i=`expr "$i" + 1`
 done
 
 #
 # /etc/resolv.conf
 #
-cat <<EOF> /etc/resolv.conf
-search ${SEARCHDOMAINS}
-EOF
+write_file_new $cf_resolv "search ${SEARCHDOMAINS}"
 
 for nameserver in $NAMESERVER_LIST; do
-	echo "nameserver ${nameserver}" >> /etc/resolv.conf
+	write_file $cf_resolv "nameserver ${nameserver}"
 done
-
-#
-# /etc/ssh/sshd_config
-#
-cat <<EOF>> /etc/ssh/sshd_config
-KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1
-EOF
-
-if [ -n "${SSH_PERMIT_ROOT_LOGIN_IPRANGE}" ]; then
-	cat <<EOF>> /etc/ssh/sshd_config
-
-Match Address ${SSH_PERMIT_ROOT_LOGIN_IPRANGE}
-	PermitRootLogin yes
-EOF
-fi
 
 #
 # Timezone
 #
-cp /usr/share/zoneinfo/${TIME_ZONE} /etc/localtime
+if [ -n "$TIME_ZONE" ]; then
+	cp /usr/share/zoneinfo/${TIME_ZONE} /etc/localtime
+fi
 
 #
 # ZFS Pool's root dataset has no need to be mounted.
@@ -262,9 +378,45 @@ echo ${DEFAULT_USER_PASSWORD} | pw useradd -n ${DEFAULT_USER_NAME} -u ${DEFAULT_
 pw groupmod -n wheel -m ${DEFAULT_USER_NAME}
 
 #
+# /etc/ssh/sshd_config
+#
+if [ -n "${SSH_PERMIT_ROOT_LOGIN_IPRANGE}" ]; then
+	cat <<-EOF>> $cf_sshd
+
+		Match Address ${SSH_PERMIT_ROOT_LOGIN_IPRANGE}
+		  PermitRootLogin yes
+
+		AllowUsers root $DEFAULT_USER_NAME
+	EOF
+else
+	write_file $cf_sshd "AllowUsers $DEFAULT_USER_NAME"
+fi
+
+#
+# SSH public keys
+#
+if [ -n "$SSH_AUTHORIZED_KEYS_FILE" ]; then
+	mkdir $dir_user_ssh
+	chown $username:$groupname $dir_user_ssh
+	chmod 700 $dir_user_ssh
+	load_file "$SSH_AUTHORIZED_KEYS_FILE" $cf_user_ssh_ak
+	chown $username:$groupname $cf_user_ssh_ak
+	chmod 600 $cf_user_ssh_ak
+
+	if [ -n "${SSH_PERMIT_ROOT_LOGIN_IPRANGE}" ]; then
+		mkdir $dir_root_ssh
+		chmod 700 $dir_root_ssh
+		load_file "$SSH_AUTHORIZED_KEYS_FILE" $cf_root_ssh_ak
+		chmod 600 $cf_root_ssh_ak
+	fi
+
+	write_file $cf_sshd "ChallengeResponseAuthentication no"
+fi
+
+#
 # Shell configuration
 #
-cat <<EOF> /cshrc.addon
+cat <<-EOF> $tmp_cshrc
 
 alias rm rm -i
 alias mv mv -i
@@ -276,21 +428,30 @@ set ignoreeof
 EOF
 
 if [ -n "${PROXY_SERVER}" ]; then
-	cat <<EOF>> /cshrc.addon
+	cat <<-EOF>> $tmp_cshrc
 
-setenv http_proxy ${PROXY_SERVER}
-setenv https_proxy ${PROXY_SERVER}
-setenv ftp_proxy ${PROXY_SERVER}
-EOF
+		setenv http_proxy ${PROXY_SERVER}
+		setenv https_proxy ${PROXY_SERVER}
+		setenv ftp_proxy ${PROXY_SERVER}
+	EOF
+	if [ -n "${NO_PROXY}" ]; then
+		cat <<-EOF>> $tmp_cshrc
+			setenv no_proxy "${NO_PROXY}"
+		EOF
+	fi
 
 	export http_proxy=${PROXY_SERVER}
 	export https_proxy=${PROXY_SERVER}
 	export ftp_proxy=${PROXY_SERVER}
+
+	if [ -n "${NO_PROXY}" ]; then
+		export no_proxy="${NO_PROXY}"
+	fi
 fi
 
-cat /cshrc.addon >> /root/.cshrc
-cat /cshrc.addon >> /home/${DEFAULT_USER_NAME}/.cshrc
-rm /cshrc.addon
+cat $tmp_cshrc >> $cf_root_cshrc
+cat $tmp_cshrc >> $cf_user_cshrc
+rm $tmp_cshrc
 
 #
 # crontabs
@@ -298,7 +459,7 @@ rm /cshrc.addon
 if [ ! -d /etc/cron.d ]; then
 	mkdir -p /etc/cron.d
 fi
-cat <<'EOF'> /etc/cron.d/00zfstools
+cat <<-'EOF'> /etc/cron.d/00zfstools
 #
 # Added for zfs-auto-snapshot(zfstools)
 #
@@ -316,38 +477,11 @@ EOF
 sysrc -f /etc/periodic.conf daily_status_zfs_enable="YES"
 
 #
-# sudoers
+# User temporary directories
 #
-if [ ! -d /usr/local/etc/sudoers.d ]; then
-	mkdir -p /usr/local/etc/sudoers.d
-fi
-cat <<EOF> /usr/local/etc/sudoers.d/99local
-Defaults timestamp_timeout = 5
-Defaults passprompt = "%u@%h SUDO PASSWORD: "
-%wheel ALL=(ALL) ALL
-EOF
-
-if [ -n "${PROXY_SERVER}" ]; then
-	cat <<EOF>> /usr/local/etc/sudoers.d/99local
-Defaults env_keep += "http_proxy https_proxy ftp_proxy no_proxy"
-EOF
-fi
-
-mkdir -p /root/tmp
-mkdir -p /home/${DEFAULT_USER_NAME}/tmp
-chown ${DEFAULT_USER_NAME}:${DEFAULT_USER_GROUP_NAME} /home/${DEFAULT_USER_NAME}/tmp
-
-#
-# Run optional body script.
-#
-load_script "$OPTIONAL_SCRIPT_BODY"
-
-
-
-##########
-# Second snapshot. Configuration customized now.
-##########
-zfs snapshot -r ${ZFSBOOT_POOL_NAME}/${ZFSBOOT_BEROOT_NAME}/${ZFSBOOT_BOOTFS_NAME}@install-01custom
+mkdir -p $dir_root_home/tmp
+mkdir -p $dir_user_home/tmp
+chown $username:$groupname $dir_user_home/tmp
 
 #
 # Swap on ZFS volume
@@ -357,10 +491,31 @@ if [ -n "${ZVOL_SWAP_SIZE}" -a "${ZVOL_SWAP_SIZE}" != "0" ]; then
 fi
 
 #
-# Basic packages
+# SNAPSHOT 01: (A) BASE SYSTEM CONFIGURATIONS DONE.
 #
+zfs snapshot -r ${ZFSBOOT_POOL_NAME}/${ZFSBOOT_BEROOT_NAME}/${ZFSBOOT_BOOTFS_NAME}@install-01A-basesys-configured
+
+
+#
+# SCRIPT 01: ADDITIONAL BASE-SYSTEM CONFIGURATIONS via "base" script.
+#
+if [ -n "$OPTIONAL_SCRIPT_BASE" ]; then
+	load_script "$OPTIONAL_SCRIPT_BASE"
+
+	#
+	# SNAPSHOT 01: (B) BASE SCRIPT EXECUTED.
+	#
+	zfs snapshot -r ${ZFSBOOT_POOL_NAME}/${ZFSBOOT_BEROOT_NAME}/${ZFSBOOT_BOOTFS_NAME}@install-01B-script-base-done
+fi
+
+
+##############################################################
+# PART 02 of 02: BASIC PACKAGE INSTALLATION
+##############################################################
 if [ "xen" = "$hv" ]; then
 	PKG_LIST="${PKG_LIST} xe-guest-utilities"
+	sysrc xenguest_enable="YES"
+	sysrc xe_daemon_enable="YES"
 fi
 
 if [ -n "${PKG_LIST}" ]; then
@@ -369,27 +524,25 @@ if [ -n "${PKG_LIST}" ]; then
 fi
 
 #
-# /usr/local/etc/pkg.conf
+# SNAPSHOT 02: (A) BASIC PACKAGES INSTALLED.
 #
-if [ -n "${PROXY_SERVER}" ]; then
-	cat <<EOF>> /usr/local/etc/pkg.conf
-PKG_ENV {
-  HTTP_PROXY: "${PROXY_SERVER}",
-  HTTPS_PROXY: "${PROXY_SERVER}",
-  FTP_PROXY: "${PROXY_SERVER}"
-}
-EOF
+zfs snapshot -r ${ZFSBOOT_POOL_NAME}/${ZFSBOOT_BEROOT_NAME}/${ZFSBOOT_BOOTFS_NAME}@install-02A-basicpkg-installed
+
+#
+# SCRIPT 02: ADDITIONAL PACKAGE CONFIGURATIONS via "pkg" script.
+#
+if [ -n "$OPTIONAL_SCRIPT_PKG" ]; then
+	load_script "$OPTIONAL_SCRIPT_PKG"
+
+	#
+	# SNAPSHOT 02: (B) PKG SCRIPT EXECUTED.
+	#
+	zfs snapshot -r ${ZFSBOOT_POOL_NAME}/${ZFSBOOT_BEROOT_NAME}/${ZFSBOOT_BOOTFS_NAME}@install-02B-script-pkg-done
 fi
 
+
 #
-# Run optional post script.
+# SNAPSHOT 03: (Z) INSTALLATION COMPLETE.
 #
-load_script "$OPTIONAL_SCRIPT_POST"
-
-
-
-##########
-# Third snapshot. Basic packages are installed.
-##########
-zfs snapshot -r ${ZFSBOOT_POOL_NAME}/${ZFSBOOT_BEROOT_NAME}/${ZFSBOOT_BOOTFS_NAME}@install-02basicpkg
+zfs snapshot -r ${ZFSBOOT_POOL_NAME}/${ZFSBOOT_BEROOT_NAME}/${ZFSBOOT_BOOTFS_NAME}@install-03Z-complete
 
