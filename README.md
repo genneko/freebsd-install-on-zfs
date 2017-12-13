@@ -122,7 +122,7 @@ __Bold__ is mandatory while the others are optional.
 
 - ZFSBOOT_GELI_ENCRYPTION
 
-    Set this to non-empty value (i.e. 1) when you want to use whole disk encryption with GELI. Default is none (empty string).
+    Set this to non-empty value (e.g. 1) when you want to use whole disk encryption with GELI. Default is none (empty string).
 
 - __ZFSBOOT_DATASETS__
 
@@ -152,7 +152,7 @@ __Bold__ is mandatory while the others are optional.
 
 - KEYMAP
 
-    A keymap to use (i.e. jp).
+    A keymap to use (e.g. jp).
 
 - __NIC_LIST__
 
@@ -180,7 +180,7 @@ __Bold__ is mandatory while the others are optional.
 
 - TIME_ZONE
 
-    A timezone to use (i.e. Asia/Tokyo).
+    A timezone to use (e.g. Asia/Tokyo).
 
 - PROXY_SERVER
 
