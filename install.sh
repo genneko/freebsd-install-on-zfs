@@ -134,7 +134,18 @@ load_file(){
 	local filename="$1"
 	local destpath="$2"
 	if [ -n "$filename" -a -n "$destpath" ]; then
+		if [ -e "$destpath" ]; then
+			if [ ! -e "$destpath.dist" ]; then
+				bkpath="$destpath.dist"
+			else
+				bkpath="$destpath.$(date '+%s')"
+			fi
+			mv "$destpath" "$bkpath"
+		fi
 		fetch --no-proxy=* -o "$destpath" ${CUSTOM_CONFIG_BASEURL}/${filename}
+		if [ $? != 0 -a ! -e "$destpath" -a -e "$bkpath" ]; then
+			mv "$bkpath" "$destpath"
+		fi
 	fi
 }
 
@@ -150,7 +161,11 @@ _write_file(){
 		fi
 		if echo "$flag" | fgrep -q "overwrite"; then
 			if [ -e "$destpath" ]; then
-				bkpath="$destpath.$(date '+%s')"
+				if [ ! -e "$destpath.dist" ]; then
+					bkpath="$destpath.dist"
+				else
+					bkpath="$destpath.$(date '+%s')"
+				fi
 				mv "$destpath" "$bkpath"
 			fi
 			echo $content > "$destpath"
@@ -208,6 +223,7 @@ load_script "${CUSTOM_CONFIG_FILE}"
 : ${DEFAULT_USER_GROUP_NAME:=users}
 : ${DEFAULT_USER_GROUP_ID:=100}
 : ${DEFAULT_USER_NAME:=freebsd}
+: ${DEFAULT_USER_FULLNAME:=User &}
 : ${DEFAULT_USER_ID:=500}
 : ${DEFAULT_USER_PASSWORD:=freebsd}
 : ${PKG_LIST=beadm sudo zfstools}
@@ -234,6 +250,7 @@ export DEFAULT_ROOT_PASSWORD
 export DEFAULT_USER_GROUP_NAME
 export DEFAULT_USER_GROUP_ID
 export DEFAULT_USER_NAME
+export DEFAULT_USER_FULLNAME
 export DEFAULT_USER_ID
 export DEFAULT_USER_PASSWORD
 export PKG_LIST
@@ -320,6 +337,7 @@ fi
 #
 sysrc zfs_enable="YES"
 sysrc hostname="${HOSTNAME}"
+hostname $HOSTNAME
 if [ -n "$KEYMAP" ]; then
 	sysrc keymap="${KEYMAP}"
 fi
@@ -374,8 +392,7 @@ zfs set mountpoint=none ${ZFSBOOT_POOL_NAME}
 #
 echo ${DEFAULT_ROOT_PASSWORD} | pw usermod root -h 0 -s /bin/tcsh
 pw groupadd -n ${DEFAULT_USER_GROUP_NAME} -g ${DEFAULT_USER_GROUP_ID}
-echo ${DEFAULT_USER_PASSWORD} | pw useradd -n ${DEFAULT_USER_NAME} -u ${DEFAULT_USER_ID} -g ${DEFAULT_USER_GROUP_NAME} -h 0 -m -s /bin/tcsh
-pw groupmod -n wheel -m ${DEFAULT_USER_NAME}
+echo ${DEFAULT_USER_PASSWORD} | pw useradd -n ${DEFAULT_USER_NAME} -c "${DEFAULT_USER_FULLNAME}" -u ${DEFAULT_USER_ID} -g ${DEFAULT_USER_GROUP_NAME} -G wheel -h 0 -m -s /bin/tcsh
 
 #
 # /etc/ssh/sshd_config

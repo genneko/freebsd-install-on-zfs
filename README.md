@@ -176,7 +176,11 @@ __Bold__ is mandatory while the others are optional.
 
 - DEFAULT_USER_NAME
 
-    Default user name. Default is "freebsd".
+    Default username. Default is "freebsd".
+
+- DEFAULT_USER_FULLNAME
+
+    Default user's fullname which goes into /etc/passwd's GECOS field. Default is "User &" ('&' is expanded to a capitalized username).
 
 - DEFAULT_USER_ID
 

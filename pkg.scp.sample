@@ -20,3 +20,12 @@ if [ -n "${PROXY_SERVER}" ]; then
 	EOF
 fi
 
+#
+# Change default user's shell to bash.
+#
+pw usermod -n $DEFAULT_USER_NAME -s /usr/local/bin/bash
+
+#
+# Install the latest ports tree.
+#
+#portsnap fetch extract
