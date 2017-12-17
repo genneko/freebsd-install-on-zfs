@@ -11,20 +11,25 @@ Basically, you need two hosts which can communicate with each other. One is a ho
     provider$ git clone https://github.com/genneko/freebsd-install-on-zfs.git
     ```
 
-2. Copy/rename sample \*.cfg/scp files and edit them as needed.
+2. Create a config/script folder for this installation by executing prepare.sh.
+
+    It creates the specified folder and copy install.sh and other config/script templates to that folder.
+    ```
+    provider$ freebsd-install-on-zfs/prepare.sh targetcfg
+    ```
+
+3. Edit config and script files in the created folder as required.
 
     See [Configuration parameters](#configuration-parameters) for details.
     ```
-    provider$ cd freebsd-install-on-zfs
-    provider$ cp baremetal.cfg.sample myserver.cfg
-    provider$ cp base.scp.sample base.scp
-    provider$ cp pkg.scp.sample pkg.scp
+    provider$ cd targetcfg
+    provider$ mv baremetal.cfg myserver.cfg
     provider$ vi myserver.cfg
     provider$ vi base.scp
     provider$ vi pkg.scp
     ```
 
-3. Start a web server to host this repository contents, more specifically install.sh and \*.cfg/scp files. Off course, you can also put those files into your existing web server's document directory instead of newly starting a service.
+4. Start a web server to host this repository contents, more specifically install.sh and \*.cfg/scp files. Off course, you can also put those files into your existing web server's document directory instead of newly starting a service.
 
     One way to do this is using the python's built-in web server module as follows.
     ```
