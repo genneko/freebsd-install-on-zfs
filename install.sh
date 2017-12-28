@@ -360,7 +360,7 @@ for nic in $NIC_LIST; do
 	sysrc ifconfig_${nic}="inet $ip netmask ${mask:-255.255.255.0}${ifopt}"
 	if [ $i -eq 1 ]; then
 		export NIC1=$nic
-	elif [ $i -eq 2]; then
+	elif [ $i -eq 2 ]; then
 		export NIC2=$nic
 	fi
 	i=`expr "$i" + 1`
