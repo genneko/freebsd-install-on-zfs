@@ -31,7 +31,7 @@ fi
 for f in $basedir/{install.sh,*.sample}; do
 	fbase=$(basename $f)
 	if [ -f "$targetdir/$fbase" ]; then
-		if diff -u $f $targetdir/$fbase >&2; then
+		if diff -u $targetdir/$fbase $f >&2; then
 			echoerr "$fbase: unchanged."
 		else
 			echoerr "$fbase: CHAGNED."
