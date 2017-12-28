@@ -11,8 +11,9 @@ fi
 cat <<-EOF> /usr/local/etc/sudoers.d/99local
 Defaults timestamp_timeout = 5
 Defaults passprompt = "%u@%h SUDO PASSWORD: "
-%wheel ALL=(ALL) ALL
+Defaults!/usr/local/bin/rsync !requiretty
 $DEFAULT_USER_NAME ALL=(ALL) NOPASSWD:/usr/local/bin/rsync
+%wheel ALL=(ALL) ALL
 EOF
 
 if [ -n "${PROXY_SERVER}" ]; then
@@ -31,4 +32,4 @@ fi
 #
 # Install the latest ports tree.
 #
-#portsnap fetch extract
+portsnap fetch extract
