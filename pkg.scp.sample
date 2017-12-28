@@ -12,6 +12,7 @@ cat <<-EOF> /usr/local/etc/sudoers.d/99local
 Defaults timestamp_timeout = 5
 Defaults passprompt = "%u@%h SUDO PASSWORD: "
 %wheel ALL=(ALL) ALL
+$DEFAULT_USER_NAME ALL=(ALL) NOPASSWD:/usr/local/bin/rsync
 EOF
 
 if [ -n "${PROXY_SERVER}" ]; then

@@ -3,14 +3,18 @@
 #   FreeBSD ZFS custom installation script for use with bsdinstall.
 #
 # Usage
-#   First, copy/create/edit *.cfg.sample to whatyoulike.cfg
-#   on a host such as your laptop.
-#   Optionally, do the same for *.scp files.
+#   First, create a config/script folder for this installation
+#   by executing prepare.sh script on a host such as your laptop.
 #
-#     cp baremetal.cfg.sample whatyoulike.cfg
-#     cp base.scp.sample base.scp
-#     cp pkg.scp.sample pkg.scp
-#     vi whatyoulike.cfg
+#     cd ~/work
+#     /somewhere/freebsd-install-on-zfs/prepare.sh myfolder
+#
+#   Then, edit config (.cfg) and/or script (.scp) files as required.
+#
+#     cd myfolder
+#     mv baremetal.cfg whatyoulike.cfg
+#     vi myserver.cfg
+#     vi init.scp
 #     vi base.scp
 #     vi pkg.scp
 #
@@ -233,7 +237,6 @@ load_script "${CUSTOM_CONFIG_FILE}"
 : ${TIME_ZONE=}
 : ${PROXY_SERVER=}
 : ${NO_PROXY=}
-: ${SSH_PERMIT_ROOT_LOGIN_IPRANGE=}
 : ${SSH_AUTHORIZED_KEYS_FILE=}
 : ${OPTIONAL_SCRIPT_INIT=}
 : ${OPTIONAL_SCRIPT_BASE=}
@@ -260,7 +263,6 @@ export KEYMAP
 export TIME_ZONE
 export PROXY_SERVER
 export NO_PROXY
-export SSH_PERMIT_ROOT_LOGIN_IPRANGE
 export SSH_AUTHORIZED_KEYS_FILE
 export OPTIONAL_SCRIPT_INIT
 export OPTIONAL_SCRIPT_BASE
@@ -397,8 +399,6 @@ echo ${DEFAULT_USER_PASSWORD} | pw useradd -n ${DEFAULT_USER_NAME} -c "${DEFAULT
 #
 # /etc/ssh/sshd_config
 #
-
-# SSH public keys
 if [ -n "$SSH_AUTHORIZED_KEYS_FILE" ]; then
 	mkdir $dir_user_ssh
 	chown $username:$groupname $dir_user_ssh
@@ -406,29 +406,9 @@ if [ -n "$SSH_AUTHORIZED_KEYS_FILE" ]; then
 	load_file "$SSH_AUTHORIZED_KEYS_FILE" $cf_user_ssh_ak
 	chown $username:$groupname $cf_user_ssh_ak
 	chmod 600 $cf_user_ssh_ak
-
-	if [ -n "${SSH_PERMIT_ROOT_LOGIN_IPRANGE}" ]; then
-		mkdir $dir_root_ssh
-		chmod 700 $dir_root_ssh
-		load_file "$SSH_AUTHORIZED_KEYS_FILE" $cf_root_ssh_ak
-		chmod 600 $cf_root_ssh_ak
-	fi
-
 	write_file $cf_sshd "ChallengeResponseAuthentication no"
 fi
-
-# SSH General configurations
-if [ -n "${SSH_PERMIT_ROOT_LOGIN_IPRANGE}" ]; then
-	cat <<-EOF>> $cf_sshd
-
-		AllowUsers root $DEFAULT_USER_NAME
-
-		Match Address ${SSH_PERMIT_ROOT_LOGIN_IPRANGE}
-		  PermitRootLogin yes
-	EOF
-else
-	write_file $cf_sshd "AllowUsers $DEFAULT_USER_NAME"
-fi
+write_file $cf_sshd "AllowUsers $DEFAULT_USER_NAME"
 
 
 #

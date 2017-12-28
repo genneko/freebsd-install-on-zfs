@@ -219,13 +219,9 @@ __Bold__ is mandatory while the others are optional.
 
     Set this to a comma-separated list of domains which you want bypass proxy server. Only valid when PROXY_SERVER is also set. Default is none.
 
-- SSH_PERMIT_ROOT_LOGIN_IPRANGE
-
-    Set this to a comma-separated list of hostnames/addresses/CIDRs from which you want to SSH-login as root. Default is none.
-
 - SSH_AUTHORIZED_KEYS_FILE
 
-    A file which contains one or more SSH public key(s) with which you can SSH-login to the target system. This file should be in the same place on the web server as install.sh (CUSTOM_CONFIG_BASEURL). The file will be installed as DEFAULT_USER_NAME's ~/.ssh/authorized_keys. If SSH_PERMIT_ROOT_LOGIN_IPRANGE is set, it will be installed as /root/.ssh/authorized_keys too. Default is none.
+    A file which contains one or more SSH public key(s) with which you can SSH-login to the target system. This file should be in the same place on the web server as install.sh (CUSTOM_CONFIG_BASEURL). The file will be installed as DEFAULT_USER_NAME's ~/.ssh/authorized_keys. Default is none.
     
 - OPTIONAL_SCRIPT_INIT
 
