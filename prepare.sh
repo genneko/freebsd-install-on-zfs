@@ -22,6 +22,6 @@ fi
 mkdir "$targetdir"
 cp -v $basedir/install.sh $targetdir
 for f in $basedir/*.sample; do
-	cp -v $f $targetdir/$(echo -n $(basename $f) | sed -r 's/\.sample$//')
+	cp -v $f $targetdir
 done
 exit 0
