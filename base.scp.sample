@@ -17,12 +17,6 @@ ln -s /data/var/album /var/album
 pw useradd -n moreuser -c "More User" -u $(expr ${DEFAULT_USER_ID} + 1) -g ${DEFAULT_USER_GROUP_NAME} -m -s /bin/tcsh
 
 #
-# /etc/ssh/sshd_config
-#
-write_file /etc/ssh/sshd_config "
-KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1" # END-QUOTE
-
-#
 # Basic firewall (PF) settings
 #
 #load_file pf.conf.$HOSTNAME /etc/pf.conf

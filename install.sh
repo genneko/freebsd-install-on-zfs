@@ -397,21 +397,8 @@ echo ${DEFAULT_USER_PASSWORD} | pw useradd -n ${DEFAULT_USER_NAME} -c "${DEFAULT
 #
 # /etc/ssh/sshd_config
 #
-if [ -n "${SSH_PERMIT_ROOT_LOGIN_IPRANGE}" ]; then
-	cat <<-EOF>> $cf_sshd
 
-		Match Address ${SSH_PERMIT_ROOT_LOGIN_IPRANGE}
-		  PermitRootLogin yes
-
-		AllowUsers root $DEFAULT_USER_NAME
-	EOF
-else
-	write_file $cf_sshd "AllowUsers $DEFAULT_USER_NAME"
-fi
-
-#
 # SSH public keys
-#
 if [ -n "$SSH_AUTHORIZED_KEYS_FILE" ]; then
 	mkdir $dir_user_ssh
 	chown $username:$groupname $dir_user_ssh
@@ -429,6 +416,20 @@ if [ -n "$SSH_AUTHORIZED_KEYS_FILE" ]; then
 
 	write_file $cf_sshd "ChallengeResponseAuthentication no"
 fi
+
+# SSH General configurations
+if [ -n "${SSH_PERMIT_ROOT_LOGIN_IPRANGE}" ]; then
+	cat <<-EOF>> $cf_sshd
+
+		AllowUsers root $DEFAULT_USER_NAME
+
+		Match Address ${SSH_PERMIT_ROOT_LOGIN_IPRANGE}
+		  PermitRootLogin yes
+	EOF
+else
+	write_file $cf_sshd "AllowUsers $DEFAULT_USER_NAME"
+fi
+
 
 #
 # Shell configuration
