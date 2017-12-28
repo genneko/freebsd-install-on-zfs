@@ -23,7 +23,9 @@ fi
 #
 # Change default user's shell to bash.
 #
-pw usermod -n $DEFAULT_USER_NAME -s /usr/local/bin/bash
+if [ -x /usr/local/bin/bash ]; then
+	pw usermod -n $DEFAULT_USER_NAME -s /usr/local/bin/bash
+fi
 
 #
 # Install the latest ports tree.
