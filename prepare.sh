@@ -28,7 +28,7 @@ else
 fi
 
 #cp -v $basedir/install.sh $targetdir
-for f in $basedir/{install.sh,*.sample}; do
+for f in $basedir/install.sh $basedir/*.sample; do
 	fbase=$(basename $f)
 	if [ -f "$targetdir/$fbase" ]; then
 		if diff -u $targetdir/$fbase $f >&2; then
