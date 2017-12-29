@@ -1,7 +1,6 @@
 #
 # Additional initialization
 #
-HOSTNAME=$(hostname -s)
 
 #
 # /etc/ssh/sshd_config

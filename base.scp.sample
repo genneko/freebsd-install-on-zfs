@@ -1,7 +1,6 @@
 #
 # Additional base system configurations
 #
-HOSTNAME=$(hostname -s)
 
 #
 # Make directory symlinks for compatibility.
