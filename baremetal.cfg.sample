@@ -78,7 +78,7 @@ DEFAULT_USER_NAME="freebsd"
 DEFAULT_USER_FULLNAME="User &"
 DEFAULT_USER_ID="500"
 DEFAULT_USER_PASSWORD="freebsd"
-PKG_LIST="beadm sudo zfstools tmux bash rsync lv ja-nkf zip unzip wget curl gnupg1 git portmaster dialog4ports"
+PKG_LIST="beadm sudo zfstools tmux bash rsync lv ja-nkf zip unzip wget curl gnupg1 git portmaster dialog4ports vim-lite"
 ZVOL_SWAP_SIZE="4G"
 
 KEYMAP="jp"
