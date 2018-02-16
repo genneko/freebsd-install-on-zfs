@@ -17,6 +17,10 @@ fi
 
 mode=install
 if [ -d "$targetdir" ]; then
+	if [ "$(readlink -f $targetdir)" = "$basedir" ]; then
+		echoerr "This is the program location. Use another directory."
+		exit 1
+	fi
 	mode=update
 	echoerr "Updating install.sh and samples in the existing '$targetdir' folder..."
 elif [ -e "$targetdir" ]; then
