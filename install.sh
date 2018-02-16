@@ -462,11 +462,11 @@ cat <<-'EOF'> /etc/cron.d/00zfstools
 # Added for zfs-auto-snapshot(zfstools)
 #
 PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-15,30,45 * * * * root /usr/local/sbin/zfs-auto-snapshot 15min     4
-0        * * * * root /usr/local/sbin/zfs-auto-snapshot hourly   24
-7        0 * * * root /usr/local/sbin/zfs-auto-snapshot daily     7
-14       0 * * 7 root /usr/local/sbin/zfs-auto-snapshot weekly    4
-28       0 1 * * root /usr/local/sbin/zfs-auto-snapshot monthly  12
+15,30,45 * * * * root /usr/local/sbin/zfs-auto-snapshot    15min     4
+0        * * * * root /usr/local/sbin/zfs-auto-snapshot    hourly   24
+7        0 * * * root /usr/local/sbin/zfs-auto-snapshot -k daily     7
+14       0 * * 7 root /usr/local/sbin/zfs-auto-snapshot -k weekly    4
+28       0 1 * * root /usr/local/sbin/zfs-auto-snapshot -k monthly  12
 EOF
 
 #
