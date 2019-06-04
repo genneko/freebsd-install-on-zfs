@@ -149,23 +149,23 @@ __Bold__ is mandatory while the others are optional.
 
 - __IP_LIST__
 
-    Space-delimited list of IP addresses. The order must match NIC_LIST.
+    Space-delimited list of IP addresses. Use 'DHCP' or 'SYNCDHCP' for an interface which acquires its address via DHCP. The order must match NIC_LIST.
 
 - __NETMASK_LIST__
 
-    Space-delimited list of netmasks. The order must match NIC_LIST.
+    Space-delimited list of netmasks. Use an arbitrary (= dummy) string for a DHCP interface. The order must match NIC_LIST.
 
 - __DEFAULTROUTER__
 
-    Default gateway (router) IP address.
+    Default gateway (router) IP address. Use an empty string ("") when you get this from DHCP.
 
 - __SEARCHDOMAINS__
 
-    Space-delimited list of domains used for name resolution.
+    Space-delimited list of domains used for name resolution. Use an empty string ("") when you get this from DHCP.
 
 - __NAMESERVER_LIST__
 
-    Space-delimited list of name servers to use.
+    Space-delimited list of name servers to use. Use an empty string ("") when you get this from DHCP.
 
 - DEFAULT_ROOT_PASSWORD
 

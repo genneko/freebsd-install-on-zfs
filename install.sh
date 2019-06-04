@@ -343,7 +343,9 @@ hostname $HOSTNAME
 if [ -n "$KEYMAP" ]; then
 	sysrc keymap="${KEYMAP}"
 fi
-sysrc defaultrouter="${DEFAULTROUTER}"
+if [ -n "$DEFAULTROUTER" ]; then
+	sysrc defaultrouter="${DEFAULTROUTER}"
+fi
 sysrc sshd_enable="YES"
 sysrc dumpdev="NO"
 sysrc ntpd_enable="YES"
@@ -359,7 +361,11 @@ i=1
 for nic in $NIC_LIST; do
 	ip=`echo $IP_LIST | cut -d " " -f $i`
 	mask=`echo $NETMASK_LIST | cut -d " " -f $i`
-	sysrc ifconfig_${nic}="inet $ip netmask ${mask:-255.255.255.0}${ifopt}"
+	if echo "$ip" | grep -qi "^\(DHCP\|SYNCDHCP\|NOSYNCDHCP\|NOAUTO\|WPA\|HOSTAP\)\$"; then
+		sysrc ifconfig_${nic}="$ip${ifopt}"
+	else
+		sysrc ifconfig_${nic}="inet $ip netmask ${mask:-255.255.255.0}${ifopt}"
+	fi
 	if [ $i -eq 1 ]; then
 		export NIC1=$nic
 	elif [ $i -eq 2 ]; then
@@ -371,7 +377,10 @@ done
 #
 # /etc/resolv.conf
 #
-write_file_new $cf_resolv "search ${SEARCHDOMAINS}"
+write_file_new $cf_resolv "# auto-generated"
+if [ -n "$SEARCHDOMAINS" ]; then
+	write_file $cf_resolv "search ${SEARCHDOMAINS}"
+fi
 
 for nameserver in $NAMESERVER_LIST; do
 	write_file $cf_resolv "nameserver ${nameserver}"
